@@ -231,17 +231,21 @@ export default function App() {
                 />
               ))
             ) : (
-              measures.map((measureChords, i) => (
-                <MeasureCard
-                  key={i}
-                  measureIndex={i}
-                  chords={measureChords}
-                  keyRoot={keyRoot}
-                  keyMode={keyMode}
-                  showTimestamps={showTimestamps}
-                  displayMode={displayMode}
-                />
-              ))
+              measures.map((measureChords, i) => {
+                const beatsPerMeasure = timeSig === '3/4' ? 3 : timeSig === '6/8' ? 6 : 4;
+                return (
+                  <MeasureCard
+                    key={i}
+                    measureIndex={i}
+                    chords={measureChords}
+                    keyRoot={keyRoot}
+                    keyMode={keyMode}
+                    showTimestamps={showTimestamps}
+                    displayMode={displayMode}
+                    beatsPerMeasure={beatsPerMeasure}
+                  />
+                );
+              })
             )}
           </section>
         </>

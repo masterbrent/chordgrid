@@ -4,42 +4,51 @@ function formatChord(chord) {
   return chord.replace(/maj/g, 'M');
 }
 
-export default function MeasureCard({ measureIndex, chords, keyRoot, keyMode, showTimestamps, displayMode }) {
-  // Calculate the total duration of the measure
-  const totalDuration = chords[chords.length - 1].end - chords[0].start;
+export default function MeasureCard({ measureIndex, chords, keyRoot, keyMode, showTimestamps, displayMode, beatsPerMeasure = 4 }) {
+  // Create an array representing each beat in the measure
+  const beats = Array(beatsPerMeasure).fill('.');
+
+  // Calculate which beat each chord starts on
+  const measureStart = chords[0].start;
+  const measureDuration = chords[chords.length - 1].end - measureStart;
+  const beatDuration = measureDuration / beatsPerMeasure;
+
+  chords.forEach((chord) => {
+    const relativeStart = chord.start - measureStart;
+    const beatIndex = Math.floor(relativeStart / beatDuration);
+    if (beatIndex >= 0 && beatIndex < beatsPerMeasure) {
+      const nash = toNashville(chord.chord, keyRoot, keyMode);
+      let displayText = '';
+
+      if (displayMode === 'chords') {
+        displayText = formatChord(chord.chord);
+      } else if (displayMode === 'degrees') {
+        displayText = nash;
+      } else { // both
+        displayText = `${formatChord(chord.chord)}/${nash}`;
+      }
+
+      beats[beatIndex] = displayText;
+    }
+  });
 
   return (
-    <div className="chord-card p-0 flex overflow-hidden">
+    <div className="chord-card flex items-center">
       <div className="chord-number">{measureIndex + 1}</div>
-      {chords.map((chord, idx) => {
-        const duration = chord.end - chord.start;
-        const proportion = duration / totalDuration;
-        const nash = toNashville(chord.chord, keyRoot, keyMode);
-
-        return (
-          <div
-            key={idx}
-            className="flex-shrink-0 flex flex-col items-center justify-center p-3 relative border-r border-zinc-300 last:border-r-0"
-            style={{ flexBasis: `${proportion * 100}%` }}
-          >
-            {displayMode === 'chords' && (
-              <div className="chord-name">{formatChord(chord.chord)}</div>
-            )}
-            {displayMode === 'degrees' && (
-              <div className="chord-name">{nash}</div>
-            )}
-            {displayMode === 'both' && (
-              <>
-                <div className="chord-name">{formatChord(chord.chord)}</div>
-                <div className="chord-nashville">{nash}</div>
-              </>
-            )}
-            {showTimestamps && idx === 0 && (
-              <div className="chord-timestamp">{chord.start.toFixed(1)}s</div>
+      <div className="flex-1 flex items-center justify-around px-4 py-3 gap-2">
+        {beats.map((beat, idx) => (
+          <div key={idx} className="flex-1 text-center">
+            {beat === '.' ? (
+              <span className="text-zinc-400 text-2xl">•</span>
+            ) : (
+              <span className="text-lg font-bold text-zinc-900">{beat}</span>
             )}
           </div>
-        );
-      })}
+        ))}
+      </div>
+      {showTimestamps && (
+        <div className="chord-timestamp">{chords[0].start.toFixed(1)}s</div>
+      )}
     </div>
   );
 }
