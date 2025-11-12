@@ -26,7 +26,15 @@ TEMPLATES = np.vstack(TEMPLATES)
 # Note: We now have 60 chord templates (12 pitches × 5 chord types)
 
 def download_audio(url, outwav):
-    cmd = ["yt-dlp", "-f", "bestaudio/best", "-x", "--audio-format", "wav", "-o", outwav, url]
+    cmd = [
+        "yt-dlp",
+        "-f", "bestaudio/best",
+        "-x",
+        "--audio-format", "wav",
+        "--extractor-args", "youtube:player_client=web",
+        "-o", outwav,
+        url
+    ]
     try:
         result = subprocess.run(cmd, check=True, capture_output=True, text=True)
         return outwav
