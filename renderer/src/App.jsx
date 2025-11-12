@@ -11,6 +11,7 @@ export default function App() {
   const [result, setResult] = useState(null);
   const [busy, setBusy] = useState(false);
   const [showTimestamps, setShowTimestamps] = useState(false);
+  const [displayMode, setDisplayMode] = useState('both'); // 'chords', 'degrees', 'both'
 
   const meta = useMemo(() => {
     if (!result) return null;
@@ -92,7 +93,29 @@ export default function App() {
           <h1 className="text-2xl font-bold">ChordGrid</h1>
           <p className="text-sm text-zinc-600">YouTube → bar-aligned chords with Nashville numbers</p>
         </div>
-        <div className="text-right">
+        <div className="text-right space-y-2">
+          {result && result.mode === 'chords' && (
+            <div className="flex gap-2 justify-end">
+              <button
+                onClick={() => setDisplayMode('chords')}
+                className={`px-3 py-1 text-sm rounded ${displayMode === 'chords' ? 'bg-blue-600 text-white' : 'bg-zinc-200 text-zinc-700'}`}
+              >
+                Chords
+              </button>
+              <button
+                onClick={() => setDisplayMode('degrees')}
+                className={`px-3 py-1 text-sm rounded ${displayMode === 'degrees' ? 'bg-blue-600 text-white' : 'bg-zinc-200 text-zinc-700'}`}
+              >
+                Degrees
+              </button>
+              <button
+                onClick={() => setDisplayMode('both')}
+                className={`px-3 py-1 text-sm rounded ${displayMode === 'both' ? 'bg-blue-600 text-white' : 'bg-zinc-200 text-zinc-700'}`}
+              >
+                Both
+              </button>
+            </div>
+          )}
           {meta && (
             <div className="text-sm text-zinc-600">
               <span className="mr-3">BPM: <b>{meta.bpm}</b></span>
@@ -173,6 +196,7 @@ export default function App() {
                   end={b.end}
                   nash={toNashville(b.chord, keyRoot, keyMode)}
                   showTimestamps={showTimestamps}
+                  displayMode={displayMode}
                 />
               ))
             )}
