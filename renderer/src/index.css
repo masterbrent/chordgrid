@@ -15,6 +15,32 @@ body {
   @apply bg-white rounded-lg shadow p-4 border border-zinc-200;
 }
 
+/* Chord chart styling */
+.chord-card {
+  @apply bg-white border-2 border-zinc-300 p-3 text-center relative;
+  min-height: 80px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.chord-number {
+  @apply absolute top-1 left-2 text-[10px] text-zinc-400 font-medium;
+}
+
+.chord-name {
+  @apply text-3xl font-bold text-zinc-900 leading-none;
+}
+
+.chord-nashville {
+  @apply text-sm font-semibold text-emerald-600 mt-1;
+}
+
+.chord-timestamp {
+  @apply absolute bottom-1 right-2 text-[10px] text-zinc-400;
+}
+
 .btn {
   @apply px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition;
 }
@@ -51,6 +77,13 @@ body {
   .card {
     @apply p-2 text-sm;
   }
+  .chord-card {
+    min-height: 70px;
+    @apply p-2;
+  }
+  .chord-name {
+    @apply text-2xl;
+  }
 }
 
 @media (max-width: 480px) {
@@ -62,5 +95,15 @@ body {
   }
   .badge {
     @apply text-[10px] px-1.5 py-0.5;
+  }
+  .chord-card {
+    min-height: 60px;
+    @apply p-1.5;
+  }
+  .chord-name {
+    @apply text-xl;
+  }
+  .chord-nashville {
+    @apply text-xs;
   }
 }

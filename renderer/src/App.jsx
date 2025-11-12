@@ -10,6 +10,7 @@ export default function App() {
   const [log, setLog] = useState('');
   const [result, setResult] = useState(null);
   const [busy, setBusy] = useState(false);
+  const [showTimestamps, setShowTimestamps] = useState(false);
 
   const meta = useMemo(() => {
     if (!result) return null;
@@ -132,7 +133,16 @@ export default function App() {
             <h2 className="text-lg font-semibold">
               {result?.mode === 'bass' ? 'Bass Tablature' : 'Bars'}
             </h2>
-            <div className="flex gap-2">
+            <div className="flex gap-2 items-center">
+              <label className="flex items-center gap-2 text-sm text-zinc-600">
+                <input
+                  type="checkbox"
+                  checked={showTimestamps}
+                  onChange={(e) => setShowTimestamps(e.target.checked)}
+                  className="rounded"
+                />
+                Show timestamps
+              </label>
               <button className="btn" onClick={exportJson}>Export JSON</button>
               <button className="btn" onClick={exportCsv}>Export CSV</button>
               {result?.mode !== 'bass' && (
@@ -150,6 +160,7 @@ export default function App() {
                   start={b.start}
                   end={b.end}
                   tabs={b.tabs || []}
+                  showTimestamps={showTimestamps}
                 />
               ))
             ) : (
@@ -161,6 +172,7 @@ export default function App() {
                   start={b.start}
                   end={b.end}
                   nash={toNashville(b.chord, keyRoot, keyMode)}
+                  showTimestamps={showTimestamps}
                 />
               ))
             )}
