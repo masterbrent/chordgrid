@@ -1,0 +1,26 @@
+{
+  "name": "chordgrid",
+  "version": "0.2.0",
+  "description": "Extract chords from YouTube and show Nashville numbers per bar",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "dev:browser": "concurrently -k \"node server.js\" \"vite --config renderer/vite.config.js\"",
+    "build:renderer": "vite build --config renderer/vite.config.js",
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.21.2",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.3.2",
+    "autoprefixer": "^10.4.20",
+    "concurrently": "^8.2.2",
+    "postcss": "^8.4.49",
+    "tailwindcss": "^3.4.14",
+    "vite": "^5.4.8"
+  }
+}

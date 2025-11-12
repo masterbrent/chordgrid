@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: chordgrid
+    env: node
+    rootDir: chordgrid
+    buildCommand: npm install && npm run build:renderer
+    startCommand: node server.js
+    envVars:
+      - key: NODE_VERSION
+        value: 18.17.0
