@@ -1,9 +1,46 @@
 import { useMemo, useState } from 'react';
 import BarCard from './components/BarCard.jsx';
 import BassTabCard from './components/BassTabCard.jsx';
+import MeasureCard from './components/MeasureCard.jsx';
 import DropdownMenu from './components/DropdownMenu.jsx';
 import SegmentedControl from './components/SegmentedControl.jsx';
 import { toNashville } from './lib/nashville.js';
+
+// Group chord segments into measures based on BPM and time signature
+function groupIntoMeasures(segments, bpm, timeSig = '4/4') {
+  if (!segments || segments.length === 0) return [];
+
+  const beatsPerMeasure = timeSig === '3/4' ? 3 : timeSig === '6/8' ? 6 : 4;
+  const secondsPerBeat = 60 / bpm;
+  const secondsPerMeasure = secondsPerBeat * beatsPerMeasure;
+
+  const measures = [];
+  let currentMeasure = [];
+  let measureStart = segments[0].start;
+  let measureEnd = measureStart + secondsPerMeasure;
+
+  for (const segment of segments) {
+    // If segment starts in current measure, add it
+    if (segment.start < measureEnd) {
+      currentMeasure.push(segment);
+    } else {
+      // Save current measure and start new one
+      if (currentMeasure.length > 0) {
+        measures.push(currentMeasure);
+      }
+      currentMeasure = [segment];
+      measureStart = measureEnd;
+      measureEnd = measureStart + secondsPerMeasure;
+    }
+  }
+
+  // Don't forget the last measure
+  if (currentMeasure.length > 0) {
+    measures.push(currentMeasure);
+  }
+
+  return measures;
+}
 
 export default function App() {
   const [url, setUrl] = useState('');
@@ -29,6 +66,11 @@ export default function App() {
   const bars = result?.segments || [];
   const keyRoot = result?.key?.tonic || 'C';
   const keyMode = result?.key?.mode || 'major';
+
+  const measures = useMemo(() => {
+    if (!result || result.mode === 'bass') return [];
+    return groupIntoMeasures(bars, meta?.bpm || 120, result.time_signature);
+  }, [result, bars, meta]);
 
   async function analyze() {
     setBusy(true);
@@ -189,14 +231,13 @@ export default function App() {
                 />
               ))
             ) : (
-              bars.map((b, i) => (
-                <BarCard
+              measures.map((measureChords, i) => (
+                <MeasureCard
                   key={i}
-                  index={i}
-                  chord={b.chord}
-                  start={b.start}
-                  end={b.end}
-                  nash={toNashville(b.chord, keyRoot, keyMode)}
+                  measureIndex={i}
+                  chords={measureChords}
+                  keyRoot={keyRoot}
+                  keyMode={keyMode}
                   showTimestamps={showTimestamps}
                   displayMode={displayMode}
                 />
