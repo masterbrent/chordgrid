@@ -1,6 +1,8 @@
 import { useMemo, useState } from 'react';
 import BarCard from './components/BarCard.jsx';
 import BassTabCard from './components/BassTabCard.jsx';
+import DropdownMenu from './components/DropdownMenu.jsx';
+import SegmentedControl from './components/SegmentedControl.jsx';
 import { toNashville } from './lib/nashville.js';
 
 export default function App() {
@@ -89,42 +91,22 @@ export default function App() {
   return (
     <div className="max-w-7xl mx-auto p-4 sm:p-6 space-y-6">
       <header className="space-y-4">
-        <div className="flex items-center justify-between">
+        <div className="flex items-start justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold">ChordGrid</h1>
-            <p className="text-sm text-zinc-600">YouTube → bar-aligned chords with Nashville numbers</p>
+            <h1 className="text-3xl font-bold text-zinc-900">ChordGrid</h1>
+            <p className="text-sm text-zinc-600 mt-1">YouTube → bar-aligned chords with Nashville numbers</p>
           </div>
-          {meta && (
-            <div className="text-sm text-zinc-600 hidden sm:block">
-              <span className="mr-3">BPM: <b>{meta.bpm}</b></span>
-              <span className="mr-3">Key: <b>{meta.keyText}</b></span>
-              <span>Time: <b>{meta.time}</b></span>
-            </div>
+          {bars.length > 0 && (
+            <DropdownMenu
+              trigger="Export"
+              items={[
+                { label: 'Export JSON', onClick: exportJson },
+                { label: 'Export CSV', onClick: exportCsv },
+                ...(result?.mode !== 'bass' ? [{ label: 'Export ChordPro', onClick: exportPro }] : [])
+              ]}
+            />
           )}
         </div>
-        {result && result.mode === 'chords' && (
-          <div className="flex gap-2 items-center">
-            <span className="text-sm font-medium text-zinc-600 mr-2">Display:</span>
-            <button
-              onClick={() => setDisplayMode('chords')}
-              className={`px-4 py-2 text-sm font-medium rounded-lg transition ${displayMode === 'chords' ? 'bg-blue-600 text-white shadow-sm' : 'bg-white text-zinc-700 border border-zinc-300 hover:bg-zinc-50'}`}
-            >
-              Chords Only
-            </button>
-            <button
-              onClick={() => setDisplayMode('degrees')}
-              className={`px-4 py-2 text-sm font-medium rounded-lg transition ${displayMode === 'degrees' ? 'bg-blue-600 text-white shadow-sm' : 'bg-white text-zinc-700 border border-zinc-300 hover:bg-zinc-50'}`}
-            >
-              Degrees Only
-            </button>
-            <button
-              onClick={() => setDisplayMode('both')}
-              className={`px-4 py-2 text-sm font-medium rounded-lg transition ${displayMode === 'both' ? 'bg-blue-600 text-white shadow-sm' : 'bg-white text-zinc-700 border border-zinc-300 hover:bg-zinc-50'}`}
-            >
-              Both
-            </button>
-          </div>
-        )}
       </header>
 
       <section className="card">
@@ -153,25 +135,44 @@ export default function App() {
 
       {bars.length > 0 && (
         <>
-          <section className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold">
-              {result?.mode === 'bass' ? 'Bass Tablature' : 'Bars'}
-            </h2>
-            <div className="flex gap-2 items-center">
-              <label className="flex items-center gap-2 text-sm text-zinc-600">
-                <input
-                  type="checkbox"
-                  checked={showTimestamps}
-                  onChange={(e) => setShowTimestamps(e.target.checked)}
-                  className="rounded"
-                />
-                Show timestamps
-              </label>
-              <button className="btn" onClick={exportJson}>Export JSON</button>
-              <button className="btn" onClick={exportCsv}>Export CSV</button>
-              {result?.mode !== 'bass' && (
-                <button className="btn" onClick={exportPro}>Export ChordPro</button>
+          <section className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-semibold text-zinc-900">
+                {result?.mode === 'bass' ? 'Bass Tablature' : 'Bars'}
+              </h2>
+              {meta && (
+                <div className="text-sm text-zinc-600 flex items-center gap-4 bg-zinc-50 px-4 py-2 rounded-lg border border-zinc-200">
+                  <span>BPM: <b className="text-zinc-900">{meta.bpm}</b></span>
+                  <span>Key: <b className="text-zinc-900">{meta.keyText}</b></span>
+                  <span>Time: <b className="text-zinc-900">{meta.time}</b></span>
+                </div>
               )}
+            </div>
+
+            <div className="flex items-center justify-between">
+              <div className="flex gap-4 items-center">
+                {result && result.mode === 'chords' && (
+                  <SegmentedControl
+                    label="Display:"
+                    value={displayMode}
+                    onChange={setDisplayMode}
+                    options={[
+                      { value: 'chords', label: 'Chords' },
+                      { value: 'degrees', label: 'Degrees' },
+                      { value: 'both', label: 'Both' }
+                    ]}
+                  />
+                )}
+                <label className="flex items-center gap-2 text-sm text-zinc-600 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={showTimestamps}
+                    onChange={(e) => setShowTimestamps(e.target.checked)}
+                    className="rounded cursor-pointer"
+                  />
+                  Show timestamps
+                </label>
+              </div>
             </div>
           </section>
 
