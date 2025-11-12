@@ -31,7 +31,7 @@ def download_audio(url, outwav):
         "-f", "bestaudio/best",
         "-x",
         "--audio-format", "wav",
-        "--extractor-args", "youtube:player_client=web",
+        "--extractor-args", "youtube:player_client=android,web",
         "-o", outwav,
         url
     ]
