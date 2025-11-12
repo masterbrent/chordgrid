@@ -1,10 +1,12 @@
 services:
   - type: web
     name: chordgrid
-    env: node
-    rootDir: chordgrid
-    buildCommand: npm install && npm run build:renderer
-    startCommand: node server.js
+    runtime: node
+    buildCommand: npm install && npm run build && python3 -m pip install --upgrade pip && python3 -m pip install -r backend/requirements.txt
+    startCommand: npm start
     envVars:
       - key: NODE_VERSION
-        value: 18.17.0
+        value: 22.16.0
+    packages:
+      - ffmpeg
+      - libsndfile1
