@@ -51,6 +51,7 @@ export default function App() {
   const [busy, setBusy] = useState(false);
   const [showTimestamps, setShowTimestamps] = useState(false);
   const [displayMode, setDisplayMode] = useState('both'); // 'chords', 'degrees', 'both'
+  const [viewMode, setViewMode] = useState('detail'); // 'detail' or 'brevity'
 
   const meta = useMemo(() => {
     if (!result) return null;
@@ -81,7 +82,14 @@ export default function App() {
       const response = await fetch('/api/analyze', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ youtubeUrl: url, options: { timesig: timeSig, mode: outputMode } })
+        body: JSON.stringify({
+          youtubeUrl: url,
+          options: {
+            timesig: timeSig,
+            mode: outputMode,
+            simplified: viewMode === 'brevity'
+          }
+        })
       }).catch(err => {
         setLog((p) => p + `Fetch error: ${err.message}\n`);
         throw new Error(`Network error: ${err.message}. Is the API server running?`);
@@ -192,18 +200,29 @@ export default function App() {
             </div>
 
             <div className="flex items-center justify-between">
-              <div className="flex gap-4 items-center">
+              <div className="flex gap-4 items-center flex-wrap">
                 {result && result.mode === 'chords' && (
-                  <SegmentedControl
-                    label="Display:"
-                    value={displayMode}
-                    onChange={setDisplayMode}
-                    options={[
-                      { value: 'chords', label: 'Chords' },
-                      { value: 'degrees', label: 'Degrees' },
-                      { value: 'both', label: 'Both' }
-                    ]}
-                  />
+                  <>
+                    <SegmentedControl
+                      label="View:"
+                      value={viewMode}
+                      onChange={setViewMode}
+                      options={[
+                        { value: 'detail', label: 'Detail' },
+                        { value: 'brevity', label: 'Brevity' }
+                      ]}
+                    />
+                    <SegmentedControl
+                      label="Display:"
+                      value={displayMode}
+                      onChange={setDisplayMode}
+                      options={[
+                        { value: 'chords', label: 'Chords' },
+                        { value: 'degrees', label: 'Degrees' },
+                        { value: 'both', label: 'Both' }
+                      ]}
+                    />
+                  </>
                 )}
                 <label className="flex items-center gap-2 text-sm text-zinc-600 cursor-pointer">
                   <input

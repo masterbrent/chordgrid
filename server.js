@@ -24,7 +24,8 @@ app.post('/api/analyze', async (req, res) => {
     path.join(__dirname, 'backend', 'chord_extractor.py'),
     '--url', youtubeUrl,
     ...(options?.timesig ? ['--timesig', options.timesig] : ['--timesig','4/4']),
-    ...(options?.mode ? ['--mode', options.mode] : ['--mode','chords'])
+    ...(options?.mode ? ['--mode', options.mode] : ['--mode','chords']),
+    ...(options?.simplified ? ['--simplified'] : [])
   ];
 
   const py = spawn(process.platform === 'win32' ? 'python' : 'python3', args, {

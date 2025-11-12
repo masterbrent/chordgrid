@@ -188,7 +188,86 @@ def note_to_bass_tab(midi_note):
         return {"string": 1, "fret": fret, "display": f"G{fret}"}
 
 
-def analyze_youtube_url(url, timesig="4/4", mode="chords"):
+def detect_structure(y, sr, beat_times):
+    """
+    Detect song structure using audio segmentation
+    Returns boundaries (in beat indices) where sections change
+    """
+    # Compute chroma features for structure detection
+    chroma = librosa.feature.chroma_cqt(y=y, sr=sr)
+
+    # Detect boundaries using self-similarity
+    rec = librosa.segment.recurrence_matrix(chroma, mode='affinity')
+    boundaries_frames = librosa.segment.agglomerative(rec, k=8)  # Find ~8 sections
+    boundaries_times = librosa.frames_to_time(boundaries_frames, sr=sr)
+
+    # Convert time boundaries to beat indices
+    boundaries_beats = []
+    for boundary_time in boundaries_times:
+        beat_idx = np.argmin(np.abs(beat_times - boundary_time))
+        boundaries_beats.append(int(beat_idx))
+
+    return sorted(set(boundaries_beats))
+
+
+def simplify_chords(segments, beat_times, timesig="4/4"):
+    """
+    Simplify chord progression by grouping consecutive identical chords
+    and showing only one chord per measure or per significant change
+    """
+    if not segments:
+        return []
+
+    beatsPerMeasure = 3 if timesig == '3/4' else 6 if timesig == '6/8' else 4
+    simplified = []
+    current_chord = None
+    measure_start_idx = 0
+
+    for i, seg in enumerate(segments):
+        # Find which measure this segment belongs to
+        seg_beat = np.argmin(np.abs(beat_times - seg['start']))
+        measure_idx = seg_beat // beatsPerMeasure
+
+        # If chord changed or new measure, add to simplified list
+        if seg['chord'] != current_chord:
+            simplified.append({
+                'chord': seg['chord'],
+                'start': seg['start'],
+                'end': seg['end'],
+                'measure': measure_idx
+            })
+            current_chord = seg['chord']
+        else:
+            # Extend the end time of the last simplified chord
+            if simplified:
+                simplified[-1]['end'] = seg['end']
+
+    return simplified
+
+
+def label_sections(boundaries_beats, total_beats):
+    """
+    Label sections based on boundaries
+    Simple heuristic: first section is often intro/verse, repeating patterns are chorus
+    """
+    section_labels = []
+    section_names = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
+
+    for i in range(len(boundaries_beats)):
+        start_beat = boundaries_beats[i]
+        end_beat = boundaries_beats[i + 1] if i + 1 < len(boundaries_beats) else total_beats
+
+        section_labels.append({
+            'section': section_names[min(i, len(section_names) - 1)],
+            'start_beat': start_beat,
+            'end_beat': end_beat,
+            'label': f'Section {section_names[min(i, len(section_names) - 1)]}'
+        })
+
+    return section_labels
+
+
+def analyze_youtube_url(url, timesig="4/4", mode="chords", simplified=False):
     """
     Main analysis function - downloads and analyzes YouTube audio
 
@@ -253,7 +332,20 @@ def analyze_youtube_url(url, timesig="4/4", mode="chords"):
             duration = librosa.get_duration(y=y, sr=sr)
             times_with_end = np.append(beat_times, duration)
             segs = segment(labels, times_with_end)
-            # Return raw segments to capture all chord changes
+
+            # Detect structure
+            try:
+                boundaries = detect_structure(y, sr, beat_times)
+                sections = label_sections(boundaries, len(beat_times))
+            except:
+                boundaries = []
+                sections = []
+
+            # If simplified mode requested, return grouped chords
+            if simplified:
+                segs = simplify_chords(segs, beat_times, timesig)
+
+            # Return raw or simplified segments
             result = {
                 "source": url,
                 "title": None,
@@ -261,7 +353,9 @@ def analyze_youtube_url(url, timesig="4/4", mode="chords"):
                 "key": key,
                 "time_signature": timesig,
                 "mode": "chords",
-                "segments": segs
+                "segments": segs,
+                "simplified": simplified,
+                "sections": sections
             }
 
         return result
@@ -274,9 +368,10 @@ def main():
     ap.add_argument('--url', required=True)
     ap.add_argument('--timesig', default='4/4')
     ap.add_argument('--mode', default='chords', choices=['chords', 'bass'])
+    ap.add_argument('--simplified', action='store_true', help='Return simplified harmonic skeleton')
     args = ap.parse_args()
 
-    result = analyze_youtube_url(args.url, args.timesig, args.mode)
+    result = analyze_youtube_url(args.url, args.timesig, args.mode, args.simplified)
     print(json.dumps(result))
     sys.exit(0)
 
