@@ -253,7 +253,7 @@ def analyze_youtube_url(url, timesig="4/4", mode="chords"):
             duration = librosa.get_duration(y=y, sr=sr)
             times_with_end = np.append(beat_times, duration)
             segs = segment(labels, times_with_end)
-            bars = bars_from_beats(segs, beat_times, timesig)
+            # Return raw segments to capture all chord changes
             result = {
                 "source": url,
                 "title": None,
@@ -261,7 +261,7 @@ def analyze_youtube_url(url, timesig="4/4", mode="chords"):
                 "key": key,
                 "time_signature": timesig,
                 "mode": "chords",
-                "segments": bars
+                "segments": segs
             }
 
         return result

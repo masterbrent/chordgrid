@@ -22,7 +22,7 @@ export default function App() {
       bpm: bpm ? Math.round(bpm) : '—',
       keyText: key ? `${key.tonic} ${key.mode}` : '—',
       time: time_signature || '4/4',
-      bars: segments?.length || 0
+      changes: segments?.length || 0
     };
   }, [result]);
 
@@ -138,7 +138,7 @@ export default function App() {
           <section className="space-y-4">
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-semibold text-zinc-900">
-                {result?.mode === 'bass' ? 'Bass Tablature' : 'Bars'}
+                {result?.mode === 'bass' ? 'Bass Tablature' : 'Chord Changes'}
               </h2>
               {meta && (
                 <div className="text-sm text-zinc-600 flex items-center gap-4 bg-zinc-50 px-4 py-2 rounded-lg border border-zinc-200">
