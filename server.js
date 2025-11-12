@@ -46,6 +46,7 @@ app.post('/api/analyze', async (req, res) => {
   });
 
   py.on('close', (code) => {
+    console.log(`Python process exited with code ${code}`);
     if (code === 0) {
       try {
         const jsonStart = out.indexOf('{');
@@ -53,12 +54,14 @@ app.post('/api/analyze', async (req, res) => {
         const result = JSON.parse(jsonStr);
         res.json(result);
       } catch (e) {
+        console.error('JSON parse error:', e.message);
         res.status(500).json({
           error: 'Failed to parse backend JSON: ' + e.message,
           stdout: out
         });
       }
     } else {
+      console.error(`Python error. Code: ${code}, stderr: ${err}`);
       res.status(500).json({
         error: 'Backend exited with code ' + code,
         stderr: err,
@@ -66,6 +69,15 @@ app.post('/api/analyze', async (req, res) => {
       });
     }
   });
+
+  // Add timeout handling
+  setTimeout(() => {
+    if (!py.killed) {
+      console.log('Python process timeout - killing');
+      py.kill();
+      res.status(504).json({ error: 'Processing timeout. Video may be too long.' });
+    }
+  }, 120000); // 2 minute timeout
 });
 
 // Serve static files from the built React app
