@@ -21,14 +21,12 @@ export default function MeasureCard({ measureIndex, chords, keyRoot, keyMode, sh
       let displayText = '';
 
       if (displayMode === 'chords') {
-        displayText = formatChord(chord.chord);
+        beats[beatIndex] = { chord: formatChord(chord.chord), nash: null };
       } else if (displayMode === 'degrees') {
-        displayText = nash;
+        beats[beatIndex] = { chord: nash, nash: null };
       } else { // both
-        displayText = `${formatChord(chord.chord)}/${nash}`;
+        beats[beatIndex] = { chord: formatChord(chord.chord), nash: nash };
       }
-
-      beats[beatIndex] = displayText;
     }
   });
 
@@ -37,11 +35,16 @@ export default function MeasureCard({ measureIndex, chords, keyRoot, keyMode, sh
       <div className="chord-number">{measureIndex + 1}</div>
       <div className="flex-1 flex items-center justify-around px-4 py-3 gap-2">
         {beats.map((beat, idx) => (
-          <div key={idx} className="flex-1 text-center">
+          <div key={idx} className="flex-1 text-center flex flex-col items-center justify-center">
             {beat === '.' ? (
               <span className="text-zinc-400 text-2xl">•</span>
             ) : (
-              <span className="text-lg font-bold text-zinc-900">{beat}</span>
+              <>
+                <span className="text-lg font-bold text-zinc-900 leading-tight">{beat.chord}</span>
+                {beat.nash && (
+                  <span className="text-xs text-emerald-600 font-semibold mt-0.5">{beat.nash}</span>
+                )}
+              </>
             )}
           </div>
         ))}

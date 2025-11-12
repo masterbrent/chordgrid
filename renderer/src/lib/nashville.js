@@ -24,12 +24,17 @@ export function toNashville(chordLabel, keyRoot = 'C', keyMode = 'major') {
   const diff = (rootIdx - keyIdx + 12) % 12;
 
   let roman = DEG_ROM[diff] || '?';
-  const isMinorish = quality.startsWith('m') || quality.includes('dim');
+
+  // Use ♭ symbol instead of 'b' for flats
+  roman = roman.replace(/^b/, '♭');
+
+  const isMinorish = quality.startsWith('m') && !quality.includes('maj');
   if (isMinorish) roman = roman.toLowerCase();
 
-  if (quality.includes('maj7')) roman += 'maj7';
-  else if (quality.includes('m7')) roman += '7';
-  else if (quality.includes('7')) roman += '7';
+  // Simplified suffix notation - just add 7 for any seventh chord
+  if (quality.includes('7')) {
+    roman += '⁷';
+  }
 
   return roman;
 }
