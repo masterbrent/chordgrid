@@ -87,43 +87,44 @@ export default function App() {
   }
 
   return (
-    <div className="max-w-6xl mx-auto p-6 space-y-6">
-      <header className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">ChordGrid</h1>
-          <p className="text-sm text-zinc-600">YouTube → bar-aligned chords with Nashville numbers</p>
-        </div>
-        <div className="text-right space-y-2">
-          {result && result.mode === 'chords' && (
-            <div className="flex gap-2 justify-end">
-              <button
-                onClick={() => setDisplayMode('chords')}
-                className={`px-3 py-1 text-sm rounded ${displayMode === 'chords' ? 'bg-blue-600 text-white' : 'bg-zinc-200 text-zinc-700'}`}
-              >
-                Chords
-              </button>
-              <button
-                onClick={() => setDisplayMode('degrees')}
-                className={`px-3 py-1 text-sm rounded ${displayMode === 'degrees' ? 'bg-blue-600 text-white' : 'bg-zinc-200 text-zinc-700'}`}
-              >
-                Degrees
-              </button>
-              <button
-                onClick={() => setDisplayMode('both')}
-                className={`px-3 py-1 text-sm rounded ${displayMode === 'both' ? 'bg-blue-600 text-white' : 'bg-zinc-200 text-zinc-700'}`}
-              >
-                Both
-              </button>
-            </div>
-          )}
+    <div className="max-w-7xl mx-auto p-4 sm:p-6 space-y-6">
+      <header className="space-y-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold">ChordGrid</h1>
+            <p className="text-sm text-zinc-600">YouTube → bar-aligned chords with Nashville numbers</p>
+          </div>
           {meta && (
-            <div className="text-sm text-zinc-600">
+            <div className="text-sm text-zinc-600 hidden sm:block">
               <span className="mr-3">BPM: <b>{meta.bpm}</b></span>
               <span className="mr-3">Key: <b>{meta.keyText}</b></span>
               <span>Time: <b>{meta.time}</b></span>
             </div>
           )}
         </div>
+        {result && result.mode === 'chords' && (
+          <div className="flex gap-2 items-center">
+            <span className="text-sm font-medium text-zinc-600 mr-2">Display:</span>
+            <button
+              onClick={() => setDisplayMode('chords')}
+              className={`px-4 py-2 text-sm font-medium rounded-lg transition ${displayMode === 'chords' ? 'bg-blue-600 text-white shadow-sm' : 'bg-white text-zinc-700 border border-zinc-300 hover:bg-zinc-50'}`}
+            >
+              Chords Only
+            </button>
+            <button
+              onClick={() => setDisplayMode('degrees')}
+              className={`px-4 py-2 text-sm font-medium rounded-lg transition ${displayMode === 'degrees' ? 'bg-blue-600 text-white shadow-sm' : 'bg-white text-zinc-700 border border-zinc-300 hover:bg-zinc-50'}`}
+            >
+              Degrees Only
+            </button>
+            <button
+              onClick={() => setDisplayMode('both')}
+              className={`px-4 py-2 text-sm font-medium rounded-lg transition ${displayMode === 'both' ? 'bg-blue-600 text-white shadow-sm' : 'bg-white text-zinc-700 border border-zinc-300 hover:bg-zinc-50'}`}
+            >
+              Both
+            </button>
+          </div>
+        )}
       </header>
 
       <section className="card">
